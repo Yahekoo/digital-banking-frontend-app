@@ -1,0 +1,135 @@
+
+<div class="container mt-5">
+    <div class="row">  
+        <div class="col col-md-6" >
+            <div *ngIf="accounts" class="alert alert-primary alert-dismissible fade show" role="alert">
+                Welcome, your bank has {{(accounts | async)?.length}} accounts !
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+                <div class="card border-gray" >
+                  <div class="card-header">
+                    <form [formGroup]="searchFormGrp" (ngSubmit)="handleSearchAccount()">
+                       
+                        <div class="input-group">
+                            <label class="input-group-text">Account ID : </label>
+                            <input class="form-control" formControlName="accountId"/>
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                  </div>
+                
+                  <div class="card-body" style="overflow: scroll;">
+                    <ng-container *ngIf="account;else failedOrLoading">
+                        <p><strong>ID :</strong> {{account.id}}</p>
+                        <p><strong>Balance :</strong> {{account.balance | number:"1.2-2"}}</p>
+                        <p><strong>Owner :</strong> {{account.customerDTO.name}}</p>
+                        <p><strong>Type :</strong> {{account.type}}</p>
+                        <p><strong>status :</strong> {{account.status}}</p>
+                        <p><strong>Date of Creation :</strong> {{account.createdAt | date:"MM-dd-yyyy HH:mm:ss"}}</p>
+                        <button (click)="getAccountOperations(account.id)" class="btn btn-outline-danger">View Operations</button>
+
+                        <ng-container *ngIf="accountHistory">
+                            <table class="table table-striped table-bordered table-hover mt-2 ">
+                                <thead>
+                                  <tr>
+                                    <th>ID</th>
+                                    <th>TYPE</th>
+                                    <th>DATE</th>
+                                    <th>AMOUNT</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let op of (accountHistory | async)?.operationsDTO">
+                                      <td>{{op.id}}</td>
+                                      <td [ngStyle]="{'color' : op.type == 'DEBIT' ? 'red': 'green' }">{{op.type}}</td>
+                                      <td>{{op.operationDate}}</td>
+                                      <td [ngStyle] = "{'background-color' : op.type == 'DEBIT' ? '#ff5e5e7a' : '#5eff957a',
+                                                        'color' :op.type == 'DEBIT' ? 'red': 'green'   }"
+                                    ><strong>{{op.amount | number : '1.2-2'}}</strong></td>
+                                      <!--td>
+                                        <button class="btn btn-danger" (click)="handleDelete(c)">
+                                          <i class="bi bi-trash"></i>
+                                        </button>
+                                      </td-->
+                                    </tr>
+                                </tbody>
+                              </table>
+                              <ul class="nav nav-pills">
+                                <li *ngFor="let item of [].constructor((accountHistory |async)?.totalPages); let page = index">
+                                    <a [ngClass]="page == currentPage ? 'btn-primary' : 'btn-outline-primary'" (click)="refreshOperations(page)" class="btn ms-1 mt-1">{{page+1}}</a>
+                                </li>
+                              </ul>
+                        </ng-container>
+                    </ng-container>
+                    
+                  </div>
+                  </div>
+             
+              <ng-template #failedOrLoading>
+                  <span *ngIf="accountErrorMessage.length==0;else error">Please enter an Account ID</span>
+              </ng-template>
+              <ng-template #error>
+                  <span class="text-danger"> Error Occured when fetching accounts : {{accountErrorMessage}}</span>
+              </ng-template>
+        
+        </div>
+        <div class="col col-md-6" >
+           <div class="card">
+            <div class="card-header">
+                Make an operation : 
+            </div>
+            <div class="card-body">
+                <form *ngIf="account;else template" [formGroup]="operationsFormGroup" method="post" (ngSubmit)="handleOperation()">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" formControlName="operationType" value="DEBIT"/>
+                        <label class="form-check-label">DEBIT</label>
+                    </div>
+    
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" formControlName="operationType" value="CREDIT"/>
+                        <label class="form-check-label">CREDIT</label>
+                    </div>
+    
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" formControlName="operationType" value="TRANSFERT"/>
+                        <label class="form-check-label">VIREMENT</label>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label"> Account : </label>
+                        <output type="text" class="form-control" disabled = "true">
+                            {{this.account.id}}
+                        </output>
+                    </div>
+    
+                    <div class="mb-3" *ngIf="operationsFormGroup.value['operationType'] == 'TRANSFERT'">
+                        <label class="form-label"> Destination Account : </label>
+                        <input type="text" class="form-control" formControlName="destination"/>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label"> Amount : </label>
+                        <input type="text" class="form-control" formControlName="amount"/>
+                    </div>
+
+                    <div class="d-grid">
+                        <button class="btn btn-success">Submit</button>
+                    </div>
+    
+                </form>
+                
+            </div>
+           </div>
+        
+        </div>
+    </div>
+   
+</div>
+
+<ng-template #template>
+    <p class="text-center" style="color:gray;font-size: 3rem;font-weight: 600;">INDISPONIBLE</p>
+   
+</ng-template>

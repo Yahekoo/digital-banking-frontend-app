@@ -7,7 +7,6 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class CustomersService {
-
  
 
   constructor(private http:HttpClient) {}
@@ -23,5 +22,14 @@ export class CustomersService {
   public getCustomerByName(keyword : string) : Observable<Array<Customer>> {
     return this.http.get<Array<Customer>>(environment.backend+"/customers/searchCustomer?keyword="+keyword);
   }
+
+  public saveCustomer(customer: Customer) : Observable<Customer>{
+    return this.http.post<Customer>(environment.backend+"/customers",customer);
+  }
+
+  deleteCustomer(id: number){
+      return this.http.delete<Customer>(environment.backend+"/customers/"+id);
+  }
+
 
 }

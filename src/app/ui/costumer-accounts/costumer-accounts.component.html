@@ -1,0 +1,32 @@
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+        Please choose one of <strong>{{customer.name}}</strong> accounts to manage : 
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover table-striped mt-2" *ngIf="accounts;else indisponible">
+                <thead>
+                    <tr>
+                        <th>Customer</th><th>Account Type</th><th>Balance</th><th>CreatedAt</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let acc of accounts | async">
+                        <td>{{customer.name}}</td>
+                        <td>{{acc.type}}</td>
+                        <td>{{acc.balance | number : '1.2-2'}}</td>
+                        <td>{{acc.createdAt | date : 'yyyy-MM-dd'}}</td>
+                        <td>
+                            <button (click)="manageAccount(acc)" class="btn btn-primary">
+                                <i class="bi bi-gear-fill"></i>
+                                Manage</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ng-template #indisponible>
+            <p class="text-center" style="color:gray;font-size: 3rem;font-weight: 600;">INDISPONIBLE</p>
+        </ng-template>
+    </div>
+</div>
